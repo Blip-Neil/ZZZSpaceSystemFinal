@@ -1,0 +1,150 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Landlord Dashboard{% endblock %}
+
+{% block content %}
+<div class="row gy-4 mb-4">
+  <div class="col-12">
+    <div class="card shadow-sm rounded-5 border-0">
+      <div class="card-body p-4 p-md-5 bg-dorming-light">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-4">
+          <div>
+            <h1 class="display-6 fw-bold mb-2">Landlord Dashboard</h1>
+            <p class="text-muted mb-3">Monitor your dorm listings, student inquiries, and premium plan upgrades in one place.</p>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <span class="badge bg-primary">{{ 'Basic' if user['plan'] == 'standard' else user['plan']|capitalize }}</span>
+              {% if user['plan'] == 'standard' %}
+                <span class="badge bg-secondary">Free edition</span>
+              {% elif user['plan'] == 'premium' %}
+                <span class="badge bg-success">Premium tools</span>
+              {% elif user['plan'] == 'enterprise' %}
+                <span class="badge bg-info text-dark">Enterprise package</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="text-md-end">
+            <a href="{{ url_for('add_listing') }}" class="btn btn-primary rounded-pill px-4">Add new dorm</a>
+            <div class="btn-group mt-3" role="group" aria-label="Plan options">
+              <a href="{{ url_for('landlord_set_plan', plan='standard') }}" class="btn btn-outline-secondary btn-sm">Basic</a>
+              <a href="{{ url_for('landlord_set_plan', plan='premium') }}" class="btn btn-outline-success btn-sm">Premium</a>
+              <a href="{{ url_for('landlord_set_plan', plan='enterprise') }}" class="btn btn-outline-info btn-sm">Enterprise</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-4 text-center">
+          <div class="col-6 col-md-2">
+            <div class="bg-white rounded-4 p-3 shadow-sm">
+              <p class="text-muted mb-1">Dorms</p>
+              <h4 class="mb-0">{{ stats.total_listings }}</h4>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="bg-white rounded-4 p-3 shadow-sm">
+              <p class="text-muted mb-1">Boosted</p>
+              <h4 class="mb-0">{{ stats.boosted }}</h4>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="bg-white rounded-4 p-3 shadow-sm">
+              <p class="text-muted mb-1">Featured</p>
+              <h4 class="mb-0">{{ stats.featured }}</h4>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="bg-white rounded-4 p-3 shadow-sm">
+              <p class="text-muted mb-1">Views</p>
+              <h4 class="mb-0">{{ stats.views }}</h4>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="bg-white rounded-4 p-3 shadow-sm">
+              <p class="text-muted mb-1">Student Requests</p>
+              <h4 class="mb-0">{{ stats.requests }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row gy-4">
+  <div class="col-xl-8">
+    <div class="row g-4">
+      {% for listing in listings %}
+      <div class="col-md-6">
+        <div class="card listing-card h-100 shadow-sm rounded-4 overflow-hidden">
+          <img src="{{ listing['image_url'] }}" class="card-img-top" alt="{{ listing['title'] }}" />
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h5 class="card-title mb-1">{{ listing['title'] }}</h5>
+                <p class="text-muted small mb-0">{{ listing['location'] }}</p>
+              </div>
+              <div class="text-end">
+                {% if listing['is_featured'] %}
+                <span class="badge bg-success me-1">Featured</span>
+                {% endif %}
+                {% if listing['is_boosted'] %}
+                <span class="badge bg-warning text-dark">Boosted</span>
+                {% endif %}
+              </div>
+            </div>
+            <p class="text-success fw-bold mb-2">₱{{ "%.0f"|format(listing['price']) }} / month</p>
+            <p class="text-muted small mb-3">Views: {{ listing['view_count'] or 0 }} · Clicks: {{ listing['click_count'] or 0 }}</p>
+            <div class="mt-auto d-grid gap-2">
+              <a href="{{ url_for('listing_detail', listing_id=listing['id']) }}" class="btn btn-outline-primary btn-sm rounded-pill">View</a>
+              <a href="{{ url_for('landlord_listing_action', listing_id=listing['id'], action='boost') }}" class="btn btn-outline-warning btn-sm rounded-pill">{{ 'Unboost' if listing['is_boosted'] else 'Boost' }}</a>
+              <a href="{{ url_for('landlord_listing_action', listing_id=listing['id'], action='feature') }}" class="btn btn-outline-success btn-sm rounded-pill">{{ 'Unfeature' if listing['is_featured'] else 'Feature' }}</a>
+              <a href="{{ url_for('landlord_listing_action', listing_id=listing['id'], action='analytics') }}" class="btn btn-outline-info btn-sm rounded-pill">Analytics</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12">
+        <div class="alert alert-info">You haven't added any dorm listings yet. <a href="{{ url_for('add_listing') }}">Add your first listing</a>.</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card shadow-sm rounded-5 border-0 mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Incoming Requests</h5>
+        {% if requests %}
+        <div class="list-group list-group-flush">
+          {% for request in requests %}
+          <div class="list-group-item rounded-4 mb-2 border">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <h6 class="mb-1">{{ request.student_name }}</h6>
+                <p class="mb-1 text-muted small">{{ request.preferred_dorm }} · {{ request.created_at }}</p>
+                <p class="mb-0 text-muted small">Budget: {{ request.budget or 'N/A' }} · Move-in: {{ request.move_in_date or 'Flexible' }}</p>
+              </div>
+              <span class="badge bg-primary align-self-start">{{ request.status|capitalize }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-light mb-0">No student requests yet. New requests will appear here as students choose your dorm.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm rounded-5 border-0">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Plan Snapshot</h5>
+        <p class="text-muted mb-3">Upgrade for better listing performance and advanced analytics.</p>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('landlord_set_plan', plan='premium') }}" class="btn btn-outline-success rounded-pill">Upgrade to Premium</a>
+          <a href="{{ url_for('landlord_set_plan', plan='enterprise') }}" class="btn btn-outline-info rounded-pill">Upgrade to Enterprise</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

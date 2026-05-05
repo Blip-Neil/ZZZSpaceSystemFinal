@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Dorming Listings{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-3">
+  <div>
+    <h1 class="display-6">Dorming Listings</h1>
+    <p class="text-muted mb-0">All student housing options in one dorming system dashboard.</p>
+    {% if query %}
+      <p class="text-primary mb-0">Search results for "{{ query }}"</p>
+    {% endif %}
+  </div>
+  <div class="w-100 w-md-auto">
+    <form method="GET" action="{{ url_for('listings') }}" class="d-flex gap-2">
+      <input name="q" class="form-control rounded-pill px-4" type="search" placeholder="Search by dorm name, location, or type" value="{{ query }}" />
+      <button class="btn btn-primary rounded-pill px-4" type="submit">Search</button>
+    </form>
+  </div>
+  {% if session.get('user_type') == 'landlord' %}
+  <a href="{{ url_for('add_listing') }}" class="btn btn-outline-primary rounded-pill px-4">Add Listing</a>
+  {% endif %}
+</div>
+
+<div id="filterButtons" class="mb-4 filter-buttons">
+  <strong>Filters:</strong>
+  <a href="{{ url_for('listings', available='1') }}" class="btn {% if request.args.get('available') %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill me-2 mb-2">Available</a>
+  <a href="{{ url_for('listings', sort='price_asc') }}" class="btn {% if request.args.get('sort') == 'price_asc' %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill me-2 mb-2">Low-High Price</a>
+  <a href="{{ url_for('listings', sort='price_desc') }}" class="btn {% if request.args.get('sort') == 'price_desc' %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill me-2 mb-2">High-Low Price</a>
+  <a href="{{ url_for('listings', tier='basic') }}" class="btn {% if request.args.get('tier') == 'basic' %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill me-2 mb-2">Basic</a>
+  <a href="{{ url_for('listings', tier='premium') }}" class="btn {% if request.args.get('tier') == 'premium' %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill me-2 mb-2">Premium</a>
+  <a href="{{ url_for('listings', tier='enterprise') }}" class="btn {% if request.args.get('tier') == 'enterprise' %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill me-2 mb-2">Enterprise</a>
+</div>
+
+<div id="listingResults" class="row gy-4">
+  {% for listing in listings %}
+    {% set tier_level = 1 if listing['tier'] == 'basic' else (2 if listing['tier'] == 'premium' else 3) %}
+    {% set user_level = 1 if user_plan == 'standard' else (2 if user_plan == 'premium' else 3) %}
+    <div class="col-md-6 col-xl-4">
+      <div class="card listing-card position-relative h-100 shadow-sm rounded-4 overflow-hidden {% if tier_level > user_level %}locked{% endif %}">
+        <button type="button" class="btn favorite-heart" data-listing-id="{{ listing['id'] }}" data-listing-title="{{ listing['title']|e }}" data-listing-image="{{ listing['image_url']|e }}" data-listing-type="{{ listing['type']|e }}" data-listing-price="{{ listing['price'] }}" data-listing-location="{{ listing['location']|e }}" aria-label="Toggle favorite" onclick="toggleFavoriteCard(this)">
+          <i class="bi bi-heart"></i>
+        </button>
+        <img src="{{ listing['image_url'] }}" class="card-img-top" alt="{{ listing['title'] }}" />
+        {% if tier_level > user_level %}
+        <span class="badge bg-dark text-white locked-badge"><i class="bi bi-lock-fill me-1"></i> Locked</span>
+        {% endif %}
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h5 class="card-title mb-1">{{ listing['title'] }}</h5>
+              <p class="text-muted small mb-0">{{ listing['location'] }}</p>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-secondary">{{ listing['type'] }}</span>
+              <span class="badge bg-{{ 'success' if listing['tier'] == 'basic' else 'warning' if listing['tier'] == 'premium' else 'dark' }} ms-1 text-uppercase">{{ listing['tier']|default('basic') }}</span>
+            </div>
+          </div>
+          <p class="text-success fw-bold mb-2">₱{{ "%.0f"|format(listing['price']) }} / month</p>
+          {% set status = 'Occupied' %}
+          {% set status_class = 'badge bg-danger' %}
+          {% if listing['rooms_available']|int > 1 %}
+            {% set status = 'Available' %}{% set status_class = 'badge bg-success' %}
+          {% elif listing['rooms_available']|int == 1 %}
+            {% set status = 'Shared' %}{% set status_class = 'badge bg-warning text-dark' %}
+          {% endif %}
+          <p class="mb-3"><span class="{{ status_class }}">{{ status }}</span></p>
+          <p class="text-muted small mb-4">{{ listing['description'][:100] }}{{ '...' if listing['description']|length > 100 }}</p>
+          {% if tier_level > user_level %}
+          <div class="alert alert-warning py-2">
+            <small class="mb-0">Locked: {{ listing['tier']|capitalize }} access required.</small>
+          </div>
+          <div class="mt-auto d-grid gap-2">
+            <a href="{{ url_for('redeem_code') }}" class="btn btn-warning rounded-pill">Upgrade Required</a>
+          </div>
+          {% else %}
+          <div class="mt-auto d-grid gap-2">
+            <button type="button" class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#bookModal{{ listing['id'] }}">Book Room</button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="bookModal{{ listing['id'] }}" tabindex="-1" aria-labelledby="bookModalLabel{{ listing['id'] }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="bookModalLabel{{ listing['id'] }}">Book {{ listing['title'] }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ url_for('book_listing', listing_id=listing['id']) }}" method="post">
+          <div class="modal-body">
+            <p class="text-muted">Reserve this room with the payment details below. The landlord will receive your request for confirmation.</p>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Dorm Location</label>
+                <input type="text" name="dorm_location" class="form-control" placeholder="e.g. Rizal Dormitory" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Move-in Date</label>
+                <input type="date" name="move_in_date" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Contact Email / Phone</label>
+                <input type="text" name="contact" class="form-control" placeholder="Email or phone" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Payment Method</label>
+                <select name="payment_method" class="form-select" required>
+                  <option value="">Select method</option>
+                  <option value="GCash">GCash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Cash on Site">Cash on Site</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Payment Reference</label>
+                <input type="text" name="payment_reference" class="form-control" placeholder="Transaction reference" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Amount</label>
+                <input type="text" class="form-control" value="₱{{ "%.0f"|format(listing['price']) }}" readonly />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Booking Notes</label>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Any extra instructions"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Submit Payment</button>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-12">
+      <div class="alert alert-info">There are no dorm listings to show right now.</div>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+function activateFilterAjax(containerId) {
+  const filterButtons = document.getElementById('filterButtons');
+  const listingResults = document.getElementById(containerId);
+  if (!filterButtons || !listingResults) return;
+
+  filterButtons.addEventListener('click', async function(event) {
+    const link = event.target.closest('a');
+    if (!link) return;
+    event.preventDefault();
+
+    const url = link.href;
+    try {
+      const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (!response.ok) throw new Error('Request failed');
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newFilter = doc.getElementById('filterButtons');
+      const newListing = doc.getElementById(containerId);
+      if (newFilter) filterButtons.innerHTML = newFilter.innerHTML;
+      if (newListing) listingResults.innerHTML = newListing.innerHTML;
+      window.history.pushState({}, '', url);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  activateFilterAjax('listingResults');
+});
+</script>
+
+<button onclick="scrollToTop()" id="backToTopBtn" class="btn btn-primary rounded-pill position-fixed bottom-0 end-0 m-3 d-none" style="z-index: 1050;">
+  ↑ Top
+</button>
+
+<script>
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('backToTopBtn');
+  if (window.scrollY > 120) {
+    btn.classList.remove('d-none');
+  } else {
+    btn.classList.add('d-none');
+  }
+});
+</script>
+{% endblock %}

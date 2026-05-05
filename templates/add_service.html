@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Add Service Ad{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title mb-3">Add New Service</h2>
+        <p class="text-muted mb-4">Create a public listing for your business services to reach students and local users.</p>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Service Type</label>
+            <select id="serviceType" class="form-select">
+              <option value="">Choose a preset service</option>
+              <option value="Laundry Pickup and Delivery">Laundry Pickup and Delivery</option>
+              <option value="Gas Refill Service">Gas Refill Service</option>
+              <option value="Laptop Repair and Maintenance">Laptop Repair and Maintenance</option>
+              <option value="Phone Repair and Accessories">Phone Repair and Accessories</option>
+              <option value="Move-In / Move-Out Assistance">Move-In / Move-Out Assistance</option>
+              <option value="Relocation and Packing Help">Relocation and Packing Help</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Service Title</label>
+            <input type="text" id="serviceTitle" name="title" class="form-control" placeholder="e.g. Laundry Pickup" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" class="form-control" placeholder="e.g. Campus Plaza" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Price or Rate</label>
+            <input type="text" name="price" class="form-control" placeholder="e.g. ₱50/kg" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Service Description</label>
+            <textarea id="serviceDescription" name="description" class="form-control" rows="5" placeholder="Describe your service, available hours, and special offers." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Publish Service</button>
+          <a href="{{ url_for('business_dashboard') }}" class="btn btn-link">Cancel</a>
+        </form>
+        <div class="mt-4">
+          <h6>Recommended services for students</h6>
+          <p class="text-muted small mb-0">Add one of these easy move-in / move-out options to help dorm students:</p>
+          <ul class="small mb-0">
+            <li>Laundry services with pickup and delivery</li>
+            <li>Gas refill or cylinder delivery</li>
+            <li>Laptop repair, setup, and maintenance</li>
+            <li>Phone repair, screen replacement, and accessories</li>
+            <li>Move-in / move-out assistance with packing</li>
+            <li>Relocation services for quick student transfers</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const serviceType = document.getElementById('serviceType');
+  const serviceTitle = document.getElementById('serviceTitle');
+  const serviceDescription = document.getElementById('serviceDescription');
+
+  if (serviceType) {
+    serviceType.addEventListener('change', () => {
+      const value = serviceType.value;
+      if (!value) return;
+      serviceTitle.value = value;
+      if (value.includes('Laundry')) {
+        serviceDescription.value = 'Fast laundry pickup and delivery for students, affordable rates, and same-day return options.';
+      } else if (value.includes('Gas')) {
+        serviceDescription.value = 'Reliable gas refill and delivery service to dorms, safe handling, and quick scheduling.';
+      } else if (value.includes('Laptop')) {
+        serviceDescription.value = 'Laptop repair and maintenance service with diagnostics, software setup, and hardware fixes.';
+      } else if (value.includes('Phone')) {
+        serviceDescription.value = 'Phone repair service for screens, batteries, and accessories with fast turnaround.';
+      } else if (value.includes('Move-In') || value.includes('Move-Out') || value.includes('Relocation')) {
+        serviceDescription.value = 'Move-in / move-out assistance for students, including packing, transport, and setup support.';
+      }
+    });
+  }
+</script>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

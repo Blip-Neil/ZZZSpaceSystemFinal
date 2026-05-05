@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Listing{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm rounded-4 p-4">
+      <h2 class="mb-4">Add a new listing</h2>
+      <form method="POST" action="{{ url_for('add_listing') }}">
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" name="title" class="form-control rounded-pill" placeholder="e.g. Cozy dorm room" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Type</label>
+          <select name="type" class="form-select rounded-pill" required>
+            <option value="">Select a property type</option>
+            <option> Dormitory</option>
+            <option> Boarding House</option>
+            <option> Apartment</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Location</label>
+          <input type="text" name="location" class="form-control rounded-pill" placeholder="City, neighborhood" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Price</label>
+          <input type="number" name="price" class="form-control rounded-pill" placeholder="Monthly rent" required />
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control rounded-3" rows="5" placeholder="Brief description" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success rounded-pill px-5">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

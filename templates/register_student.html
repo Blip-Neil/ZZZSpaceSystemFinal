@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Student{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow-sm rounded-4">
+      <div class="card-body p-5">
+        <h2 class="mb-4">Register as Student</h2>
+        <form method="POST" action="{{ url_for('register_student') }}" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-control rounded-pill" placeholder="Your full name" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control rounded-pill" placeholder="you@example.com" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">University</label>
+            <input type="text" name="university" class="form-control rounded-pill" placeholder="Your university" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="tel" name="phone" class="form-control rounded-pill" placeholder="Your phone number" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Profile Image</label>
+            <input type="file" name="profile_image" class="form-control rounded-pill" accept="image/*" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control rounded-pill" placeholder="Password" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" name="confirm_password" class="form-control rounded-pill" placeholder="Confirm password" required />
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" name="eula" class="form-check-input" id="eula" required />
+            <label class="form-check-label" for="eula">
+              I accept the <a href="#" data-bs-toggle="modal" data-bs-target="#eulaModal">End User License Agreement (EULA)</a>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-success w-100 rounded-pill">Register</button>
+        </form>
+        <p class="text-center text-muted mt-4">Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="eulaModal" tabindex="-1" aria-labelledby="eulaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eulaModalLabel">End User License Agreement (EULA)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="card border-0">
+          <div class="card-body">
+            <h6 class="mb-3">Agreement Overview</h6>
+            <p>This End User License Agreement governs your use of the Zzzpace platform and sets forth the terms under which students may register, browse listings, and access the service.</p>
+            <h6 class="mt-4">User Responsibilities</h6>
+            <ul>
+              <li>You agree to provide accurate registration and contact information.</li>
+              <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+              <li>You agree to use the platform only for legitimate rental search activity.</li>
+            </ul>
+            <h6 class="mt-4">Platform Terms</h6>
+            <p>Zzzpace does not guarantee availability of any specific listing. Listings are provided by landlords and may change over time. The platform is provided for informational purposes and should be used in accordance with local laws and housing regulations.</p>
+            <h6 class="mt-4">Data Privacy</h6>
+            <p>Your personal information, including name, email, university, phone number, and profile image, is collected to create and manage your account. We are committed to protecting your privacy and will not share your data with third parties without your consent, except as required by law. Data is stored securely and used solely for platform functionality. You have the right to request access, correction, or deletion of your personal data by contacting our support team.</p>
+            <h6 class="mt-4">Acceptance</h6>
+            <p>By checking the box and submitting this form, you confirm that you have read and agree to the terms of this agreement.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

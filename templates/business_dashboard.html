@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% block title %}Business Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="mb-1">Business Dashboard</h1>
+    <p class="text-muted">Your business services are displayed in cards so students can discover and avail them quickly.</p>
+  </div>
+  <div>
+    <a href="{{ url_for('business_add_service') }}" class="btn btn-primary">Add Service Ad</a>
+  </div>
+</div>
+
+<div class="row gy-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Business Profile</h5>
+        <p class="text-muted">Update your contact details so students know how to reach you.</p>
+        <form action="{{ url_for('business_update_profile') }}" method="post">
+          <div class="mb-3">
+            <label class="form-label">Business Name</label>
+            <input type="text" class="form-control" value="{{ user.company or '' }}" disabled />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Business Location</label>
+            <input type="text" name="business_location" class="form-control" value="{{ user.business_location or '' }}" placeholder="e.g. Market Street, Downtown" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contact Phone</label>
+            <input type="text" name="phone" class="form-control" value="{{ user.phone or '' }}" placeholder="e.g. +1-555-0125" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Business Description</label>
+            <textarea name="business_description" class="form-control" rows="4" placeholder="Describe your services, offers, and location.">{{ user.business_description or '' }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-success w-100">Save Profile</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Business Insights</h5>
+        <div class="mb-3">
+          <div class="text-uppercase text-muted small">Service ads</div>
+          <div class="fs-3 fw-bold">{{ stats.total_services }}</div>
+        </div>
+        <div class="mb-3">
+          <div class="text-uppercase text-muted small">Featured</div>
+          <div class="fs-3 fw-bold">{{ stats.featured_services }}</div>
+        </div>
+        <div>
+          <div class="text-uppercase text-muted small">Boosted</div>
+          <div class="fs-3 fw-bold">{{ stats.boosted_services }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      {% if services %}
+        {% for service in services %}
+        <div class="col">
+          <div class="card shadow-sm h-100">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h5 class="card-title mb-1">{{ service.title }}</h5>
+                  <p class="text-muted small mb-0">{{ service.location }} • {{ service.price }}</p>
+                </div>
+                <div class="text-end">
+                  {% if service.is_featured %}
+                  <span class="badge bg-warning text-dark me-1">Featured</span>
+                  {% endif %}
+                  {% if service.is_boosted %}
+                  <span class="badge bg-info text-dark">Boosted</span>
+                  {% endif %}
+                </div>
+              </div>
+              <p class="text-secondary mb-3">{{ service.description }}</p>
+              <form class="mb-3">
+                <div class="mb-2">
+                  <label class="form-label small">Dorm location</label>
+                  <input type="text" class="form-control form-control-sm" placeholder="e.g. Rizal Dormitory" />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small">Preferred date</label>
+                  <input type="date" class="form-control form-control-sm" />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small">Notes</label>
+                  <input type="text" class="form-control form-control-sm" placeholder="Pickup details or service request" />
+                </div>
+              </form>
+              <div class="mt-auto d-grid gap-2">
+                <button type="button" class="btn btn-primary">Buy Service</button>
+                <div class="d-flex gap-2 flex-wrap">
+                  <a href="{{ url_for('business_edit_service', service_id=service.id) }}" class="btn btn-sm btn-outline-secondary flex-fill">Edit</a>
+                  <a href="{{ url_for('business_delete_service', service_id=service.id) }}" class="btn btn-sm btn-outline-danger flex-fill">Delete</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="col-12">
+          <div class="card shadow-sm border-dashed">
+            <div class="card-body text-center">
+              <h5 class="card-title">No services yet</h5>
+              <p class="text-muted">Add your first student-friendly service so users can avail it right away.</p>
+              <a href="{{ url_for('business_add_service') }}" class="btn btn-primary">Add Service Ad</a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card shadow-sm mt-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Customer Inquiries</h5>
+        {% if inquiries %}
+        <div class="table-responsive">
+          <table class="table table-borderless align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Sender</th>
+                <th>Contact</th>
+                <th>Message</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for inquiry in inquiries %}
+              <tr>
+                <td>{{ inquiry.service_title or 'Unknown' }}</td>
+                <td>{{ inquiry.sender_name }}</td>
+                <td>{{ inquiry.sender_contact }}</td>
+                <td>{{ inquiry.message }}</td>
+                <td>{{ inquiry.created_at }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-light">No inquiries yet. Students can contact you once your services are live.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h5 class="card-title mb-1">Business Available</h5>
+            <p class="text-muted small mb-0">Student-ready businesses with quick order forms and buy buttons.</p>
+          </div>
+          <span class="badge bg-success">Live</span>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 g-3">
+          <div class="col">
+            <div class="card border rounded-4 h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                  <span class="badge bg-primary rounded-circle p-3"><i class="bi bi-droplet-fill"></i></span>
+                  <div>
+                    <h6 class="mb-0">GasGo</h6>
+                    <small class="text-muted">Gas refill delivery</small>
+                  </div>
+                </div>
+                <form class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label small">Dorm location</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Enter dorm address" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Cylinder type</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="e.g. 11kg LPG" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Notes</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Any special delivery instructions" />
+                  </div>
+                </form>
+                <button type="button" class="btn btn-primary mt-auto">Buy Service</button>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border rounded-4 h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                  <span class="badge bg-secondary rounded-circle p-3"><i class="bi bi-basket-fill"></i></span>
+                  <div>
+                    <h6 class="mb-0">Laundry Hub</h6>
+                    <small class="text-muted">Wash & fold pickup</small>
+                  </div>
+                </div>
+                <form class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label small">Dorm location</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Enter dorm address" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Bag weight</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="e.g. 5 kg" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Notes</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Special detergent or garments" />
+                  </div>
+                </form>
+                <button type="button" class="btn btn-primary mt-auto">Buy Service</button>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border rounded-4 h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                  <span class="badge bg-info rounded-circle p-3"><i class="bi bi-laptop"></i></span>
+                  <div>
+                    <h6 class="mb-0">Laptop Medic</h6>
+                    <small class="text-muted">Laptop repair & setup</small>
+                  </div>
+                </div>
+                <form class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label small">Dorm location</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Enter dorm address" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Problem type</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="e.g. screen, battery" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Notes</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Additional details" />
+                  </div>
+                </form>
+                <button type="button" class="btn btn-primary mt-auto">Buy Service</button>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border rounded-4 h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                  <span class="badge bg-warning rounded-circle p-3"><i class="bi bi-phone-fill"></i></span>
+                  <div>
+                    <h6 class="mb-0">Phone Fix</h6>
+                    <small class="text-muted">Phone repair & accessories</small>
+                  </div>
+                </div>
+                <form class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label small">Dorm location</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Enter dorm address" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Repair type</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="e.g. screen, battery" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Notes</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Phone model or issue" />
+                  </div>
+                </form>
+                <button type="button" class="btn btn-primary mt-auto">Buy Service</button>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border rounded-4 h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                  <span class="badge bg-success rounded-circle p-3"><i class="bi bi-truck-flatbed"></i></span>
+                  <div>
+                    <h6 class="mb-0">MoveEase</h6>
+                    <small class="text-muted">Move-in / move-out help</small>
+                  </div>
+                </div>
+                <form class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label small">Dorm location</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Enter dorm address" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Move date</label>
+                    <input type="date" class="form-control form-control-sm" />
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small">Notes</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Packing or timing notes" />
+                  </div>
+                </form>
+                <button type="button" class="btn btn-primary mt-auto">Buy Service</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-muted small mt-3 mb-0">Laundry, gas refill, laptop repair, phone repair, and move-in/move-out assistance.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

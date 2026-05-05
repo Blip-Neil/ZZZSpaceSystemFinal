@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Dorming Access{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-75">
+  <div class="col-lg-7">
+    <div class="card shadow-lg rounded-5 border-0 overflow-hidden">
+      <div class="row g-0">
+        <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center bg-dorming-dark text-white p-5">
+          <div class="text-center">
+            <img src="{{ url_for('static', filename='Logo.png') }}" alt="ZZZSpace logo" class="page-brand-logo mb-3" />
+            <h2 class="page-brand-title">ZZZSpace</h2>
+            <p class="mb-4">A Dorming System Web Application built for students, landlords, and local businesses.</p>
+            <p class="small opacity-75">Access a simplified account path and discover student housing quickly.</p>
+          </div>
+        </div>
+        <div class="col-md-6 p-5">
+          <div class="mb-4 text-center">
+            <h3 class="fw-bold">LOG IN AS</h3>
+            <p class="text-muted">Select the account role to continue into Dorming.</p>
+          </div>
+          <div class="d-grid gap-3">
+            <a href="{{ url_for('login_as', user_type='student') }}" class="btn btn-dorming btn-lg rounded-pill">STUDENT</a>
+            <a href="{{ url_for('login_as', user_type='landlord') }}" class="btn btn-outline-dorming btn-lg rounded-pill">LANDLORD</a>
+            <a href="{{ url_for('login_as', user_type='business') }}" class="btn btn-outline-secondary btn-lg rounded-pill">BUSINESS</a>
+          </div>
+          <div class="mt-4 text-center text-muted small">
+            Use the buttons above to explore Dorming as a student, landlord, or business.
+          </div>
+          <div class="mt-3 text-center">
+            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#emergencyModal">EMERGENCY</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Emergency Modal -->
+<div class="modal fade" id="emergencyModal" tabindex="-1" aria-labelledby="emergencyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content rounded-4 border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="emergencyModalLabel">Emergency Response Services</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-muted mb-4">Reach out quickly to police, rescue, or medical teams when you need urgent help.</p>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card h-100 border-danger rounded-4 p-3">
+              <div class="card-body">
+                <h6 class="card-title text-danger"><i class="bi bi-shield-lock me-2"></i>PNP Police</h6>
+                <p class="text-muted small mb-2">Report security or safety incidents immediately.</p>
+                <p class="mb-2"><strong>Hotline:</strong> 117</p>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="Your name" />
+                </div>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="Location / address" />
+                </div>
+                <div class="mb-2">
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Incident details"></textarea>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger rounded-pill w-100" onclick="submitEmergency('PNP Police')">Send Report</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 border-danger rounded-4 p-3">
+              <div class="card-body">
+                <h6 class="card-title text-danger"><i class="bi bi-fire me-2"></i>BFP Rescue & Firefighter</h6>
+                <p class="text-muted small mb-2">Request rescue, fire response, or urgent assistance.</p>
+                <p class="mb-2"><strong>Hotline:</strong> 160</p>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="Your name" />
+                </div>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="Location / building" />
+                </div>
+                <div class="mb-2">
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Emergency details"></textarea>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger rounded-pill w-100" onclick="submitEmergency('BFP Rescue & Firefighter')">Request Rescue</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 border-danger rounded-4 p-3">
+              <div class="card-body">
+                <h6 class="card-title text-danger"><i class="bi bi-heart-pulse me-2"></i>Hospital / Ambulance</h6>
+                <p class="text-muted small mb-2">Call for medical emergency transport and urgent care.</p>
+                <p class="mb-2"><strong>Hotline:</strong> 911</p>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="Your name" />
+                </div>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="Patient condition" />
+                </div>
+                <div class="mb-2">
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Medical issue description"></textarea>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger rounded-pill w-100" onclick="submitEmergency('Hospital / Ambulance')">Call Ambulance</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+<script>
+function submitEmergency(serviceName) {
+  console.log('submitEmergency called with:', serviceName);
+  
+  // Show demo success message
+  alert(`🚨 EMERGENCY ALERT RECEIVED!\n\nYour ${serviceName} request has been submitted.\n\n✅ Message received\n🚑 Emergency team is on the way\n\n(This is a demo - no actual emergency services were contacted)`);
+  
+  console.log('Alert shown, now closing modal');
+  
+  // Close the modal
+  const modalElement = document.getElementById('emergencyModal');
+  console.log('Modal element found:', modalElement);
+  
+  // Try multiple methods to close the modal
+  try {
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      console.log('Using Bootstrap Modal API');
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      if (modal) {
+        modal.hide();
+      } else {
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+      }
+    } else if (typeof $ !== 'undefined' && $.fn.modal) {
+      console.log('Using jQuery to close modal');
+      $(modalElement).modal('hide');
+    } else {
+      console.log('Using manual method to close modal');
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      document.body.classList.remove('modal-open');
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.remove();
+    }
+  } catch (error) {
+    console.error('Error closing modal:', error);
+    // Fallback: just hide it manually
+    modalElement.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) backdrop.remove();
+  }
+  
+  // Clear all form fields in the modal
+  const inputs = modalElement.querySelectorAll('input, textarea');
+  console.log('Clearing', inputs.length, 'form fields');
+  inputs.forEach(input => input.value = '');
+  
+  console.log('submitEmergency completed');
+}
+</script>
+
+
+
+
+

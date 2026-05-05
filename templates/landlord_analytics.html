@@ -1,0 +1,70 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Listing Analytics{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm rounded-4">
+      <div class="card-body">
+        <div class="d-flex align-items-start justify-content-between mb-4 flex-column flex-md-row gap-3">
+          <div>
+            <h1 class="display-6">Listing Analytics</h1>
+            <p class="text-muted">Review performance metrics for this listing.</p>
+          </div>
+          <a href="{{ url_for('landlord_dashboard') }}" class="btn btn-outline-secondary rounded-pill">Back to Dashboard</a>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="border rounded-4 p-3 text-center">
+              <p class="mb-1 text-muted">Views</p>
+              <h4 class="mb-0">{{ listing['view_count'] or 0 }}</h4>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="border rounded-4 p-3 text-center">
+              <p class="mb-1 text-muted">Clicks</p>
+              <h4 class="mb-0">{{ listing['click_count'] or 0 }}</h4>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="border rounded-4 p-3 text-center">
+              <p class="mb-1 text-muted">Boosted</p>
+              <h4 class="mb-0">{{ 'Yes' if listing['is_boosted'] else 'No' }}</h4>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="border rounded-4 p-3 text-center">
+              <p class="mb-1 text-muted">Featured</p>
+              <h4 class="mb-0">{{ 'Yes' if listing['is_featured'] else 'No' }}</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Listing Details</h5>
+            <p class="mb-1"><strong>Title:</strong> {{ listing['title'] }}</p>
+            <p class="mb-1"><strong>Location:</strong> {{ listing['location'] }}</p>
+            <p class="mb-1"><strong>Price:</strong> ₱{{ "%.0f"|format(listing['price']) }} / month</p>
+            <p class="mb-0"><strong>Description:</strong> {{ listing['description'] }}</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Recommended Actions</h5>
+            <ul class="list-unstyled mb-0">
+              <li>• Use boost to keep your listing at the top.</li>
+              <li>• Feature your best rooms to increase trust.</li>
+              <li>• Update images and description frequently.</li>
+              <li>• Monitor views and clicks to spot interest patterns.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

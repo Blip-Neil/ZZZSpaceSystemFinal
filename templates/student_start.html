@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Start{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3">
+  <div class="row justify-content-center">
+    <div class="col-xl-10 col-lg-12">
+      <div class="card shadow-lg rounded-5 overflow-hidden">
+        <div class="row g-0">
+          <div class="col-lg-5 bg-dorming-dark text-white p-4 p-lg-5 d-flex flex-column justify-content-center">
+            <div>
+              <div class="card dorm-preview-card mb-4 rounded-4 position-relative overflow-hidden">
+                <img id="previewImage" src="{{ listings[0]['image_url'] if listings else '' }}" alt="Dorm preview" class="preview-image" />
+                <div class="preview-details">
+                  <h5 id="previewTitle" class="card-title mb-2">{{ listings[0]['title'] if listings else 'Select a dorm to preview' }}</h5>
+                  <p class="mb-1"><strong>Type:</strong> <span id="previewType">{{ listings[0]['type'] if listings else '-' }}</span></p>
+                  <p class="mb-1"><strong>Price:</strong> <span id="previewPrice">{% if listings %}₱{{ listings[0]['price']|round(0, 'floor')|int }}{% else %}-{% endif %}</span></p>
+                  <p class="mb-0"><strong>Availability:</strong> <span id="previewAvailability">{% if listings %}{{ 'Shared' if listings[0]['rooms_available']|int > 1 else 'Available' }}{% else %}-{% endif %}</span></p>
+                </div>
+              </div>
+              <h2 class="fw-bold mb-3">Student Onboarding</h2>
+              <p class="text-white-75 mb-4">Tell us a little about your dorm preferences and choose the place you want to explore.</p>
+              <ul class="list-unstyled text-white-75 small">
+                <li>• Choose your access tier</li>
+                <li>• Fill student details</li>
+                <li>• Select preferred dorm</li>
+                <li>• Set your budget and move-in date</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-7 p-4 p-lg-5">
+            <h3 class="mb-4">Start your dorm search</h3>
+            
+            <!-- Tier Selection -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Choose your access tier</label>
+              <div class="row g-3 justify-content-center">
+                <div class="col-12 col-sm-6 col-lg-4">
+                  <div class="card tier-card h-100 border rounded-4 p-3" data-tier="basic" onclick="selectTier('basic')">
+                    <div class="card-body text-center">
+                      <div class="tier-icon mb-2">
+                        <i class="bi bi-house-door text-success" style="font-size: 2rem;"></i>
+                      </div>
+                      <h6 class="card-title mb-2">BASIC</h6>
+                      <p class="card-text small text-muted mb-2">Free access to basic dorm listings</p>
+                      <span class="badge bg-success">Free</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                  <div class="card tier-card h-100 border rounded-4 p-3" data-tier="premium" onclick="selectTier('premium')">
+                    <div class="card-body text-center">
+                      <div class="tier-icon mb-2">
+                        <i class="bi bi-star text-warning" style="font-size: 2rem;"></i>
+                      </div>
+                      <h6 class="card-title mb-2">PREMIUM</h6>
+                      <p class="card-text small text-muted mb-2">Access premium dorms with better amenities</p>
+                      <span class="badge bg-warning text-dark">Requires Code</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                  <div class="card tier-card h-100 border rounded-4 p-3" data-tier="enterprise" onclick="selectTier('enterprise')">
+                    <div class="card-body text-center">
+                      <div class="tier-icon mb-2">
+                        <i class="bi bi-building text-primary" style="font-size: 2rem;"></i>
+                      </div>
+                      <h6 class="card-title mb-2">ENTERPRISE</h6>
+                      <p class="card-text small text-muted mb-2">Full access to all dorms including VIP listings</p>
+                      <span class="badge bg-primary">Requires Code</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          <!-- Code Verification (Hidden by default) -->
+          <div id="codeVerification" class="mb-4 d-none">
+            <div class="border rounded-4 p-3 p-lg-4 bg-light">
+              <h6 class="mb-3">Verify Access Code</h6>
+              <p class="text-muted small mb-3">Enter your access code to unlock <span id="tierName"></span> features.</p>
+              <div class="row g-2 g-sm-3 align-items-end">
+                <div class="col-12 col-sm-8">
+                  <label class="form-label">Access Code</label>
+                  <input type="text" id="accessCode" class="form-control rounded-pill" placeholder="Enter your code" />
+                </div>
+                <div class="col-12 col-sm-4">
+                  <button type="button" id="verifyCodeBtn" class="btn btn-outline-primary rounded-pill w-100" onclick="verifyCode()">Check Code</button>
+                </div>
+              </div>
+              <div id="verificationResult" class="mt-3 d-none">
+                <div class="alert alert-success py-2">
+                  <small class="mb-0"><i class="bi bi-check-circle me-1"></i>Code verified! <span id="tierAccessText"></span> access granted.</small>
+                </div>
+              </div>
+              <div id="verificationError" class="mt-3 d-none">
+                <div class="alert alert-danger py-2">
+                  <small class="mb-0"><i class="bi bi-x-circle me-1"></i>Invalid code. Please check and try again.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form method="post" id="studentForm">
+            <input type="hidden" name="selected_tier" id="selectedTier" value="basic" />
+            <input type="hidden" name="verified_code" id="verifiedCode" value="" />
+            <div class="mb-3">
+              <label class="form-label">Your Name</label>
+              <input type="text" name="name" class="form-control rounded-pill" placeholder="Student Name" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Preferred Dorm</label>
+              <select name="preferred_dorm" id="preferredDorm" class="form-select rounded-pill" onchange="updateDormPreview()">
+                <option value="">Choose a dorm</option>
+                {% for listing in listings %}
+                <option value="{{ listing['id'] }}"
+                        data-image="{{ listing['image_url'] }}"
+                        data-type="{{ listing['type'] }}"
+                        data-price="{{ listing['price'] }}"
+                        data-availability="{{ 'Shared' if listing['rooms_available']|int > 1 else 'Available' }}">
+                  {{ listing['title'] }} — {{ listing['location'] }} ({{ listing['tier'].upper() }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-6">
+                <label class="form-label">Budget</label>
+                <input type="text" name="budget" class="form-control rounded-pill" placeholder="e.g. ₱2000" />
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label">Move-in Date</label>
+                <input type="date" name="move_in" class="form-control rounded-pill" />
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Need a dorm recommendation?</label>
+              <div class="border rounded-4 p-3 bg-light">
+                <p class="mb-2"><strong>Top dorm pick:</strong></p>
+                <p id="topDormTitle" class="mb-0">{{ listings[0]['title'] if listings else 'No dorms available yet' }}</p>
+                <p id="topDormLocation" class="text-muted small mb-0">{{ listings[0]['location'] if listings else '' }}</p>
+              </div>
+            </div>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <button type="submit" id="submitBtn" class="btn btn-primary rounded-pill px-4" disabled>Submit Request</button>
+              <a href="{{ url_for('listings') }}" class="btn btn-outline-secondary rounded-pill px-4">Browse without saving</a>
+            </div>
+            <p class="mt-3 text-muted small">When you submit, the dorm owner will receive a request notice for your preferred room.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedTier = 'basic';
+let isVerified = false;
+
+function selectTier(tier) {
+  selectedTier = tier;
+  document.getElementById('selectedTier').value = tier;
+  
+  // Update UI
+  document.querySelectorAll('.tier-card').forEach(card => {
+    card.classList.remove('border-primary', 'bg-light');
+  });
+  document.querySelector(`[data-tier="${tier}"]`).classList.add('border-primary', 'bg-light');
+  
+  // Update dorm dropdown based on selected tier
+  updateDormDropdown(tier);
+  
+  // Show/hide code verification
+  const codeVerification = document.getElementById('codeVerification');
+  const tierName = document.getElementById('tierName');
+  
+  if (tier === 'basic') {
+    codeVerification.classList.add('d-none');
+    isVerified = true;
+    document.getElementById('verifiedCode').value = '';
+    document.getElementById('verificationResult').classList.add('d-none');
+    document.getElementById('verificationError').classList.add('d-none');
+  } else {
+    codeVerification.classList.remove('d-none');
+    tierName.textContent = tier.toUpperCase();
+    isVerified = false;
+    document.getElementById('verifiedCode').value = '';
+    document.getElementById('verificationResult').classList.add('d-none');
+    document.getElementById('verificationError').classList.add('d-none');
+  }
+  
+  updateSubmitButton();
+}
+
+function updateDormDropdown(tier) {
+  const dropdown = document.getElementById('preferredDorm');
+  
+  // Clear current options except the first one
+  while (dropdown.options.length > 1) {
+    dropdown.remove(1);
+  }
+  
+  // Add loading option
+  const loadingOption = document.createElement('option');
+  loadingOption.value = '';
+  loadingOption.textContent = 'Loading...';
+  dropdown.appendChild(loadingOption);
+  
+  // Fetch filtered listings
+  fetch(`/student-start?tier=${tier}`)
+    .then(response => response.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newDropdown = doc.getElementById('preferredDorm');
+      const newTopTitle = doc.getElementById('topDormTitle');
+      const newTopLocation = doc.getElementById('topDormLocation');
+      
+      // Clear loading option
+      while (dropdown.options.length > 1) {
+        dropdown.remove(1);
+      }
+      
+      if (!newDropdown || newDropdown.options.length <= 1) {
+        const noDormOption = document.createElement('option');
+        noDormOption.value = '';
+        noDormOption.textContent = 'No dorms available for this tier';
+        dropdown.appendChild(noDormOption);
+
+        setPreview({
+          image: '',
+          title: 'Select a dorm to preview',
+          type: '-',
+          price: '-',
+          availability: '-'
+        });
+        
+        if (newTopTitle) {
+          document.getElementById('topDormTitle').textContent = 'No dorms available yet';
+        }
+        if (newTopLocation) {
+          document.getElementById('topDormLocation').textContent = '';
+        }
+        return;
+      }
+
+      // Add new options
+      for (let i = 1; i < newDropdown.options.length; i++) {
+        const option = document.createElement('option');
+        option.value = newDropdown.options[i].value;
+        option.textContent = newDropdown.options[i].textContent;
+        option.dataset.image = newDropdown.options[i].dataset.image || '';
+        option.dataset.type = newDropdown.options[i].dataset.type || '';
+        option.dataset.price = newDropdown.options[i].dataset.price || '';
+        option.dataset.availability = newDropdown.options[i].dataset.availability || '';
+        dropdown.appendChild(option);
+      }
+
+      if (newTopTitle) {
+        document.getElementById('topDormTitle').textContent = newTopTitle.textContent;
+      }
+      if (newTopLocation) {
+        document.getElementById('topDormLocation').textContent = newTopLocation.textContent;
+      }
+
+      updateDormPreview();
+    })
+    .catch(error => {
+      console.error('Error updating dorm dropdown:', error);
+      // Fallback: clear loading and show error
+      while (dropdown.options.length > 1) {
+        dropdown.remove(1);
+      }
+      const errorOption = document.createElement('option');
+      errorOption.value = '';
+      errorOption.textContent = 'Error loading dorms';
+      dropdown.appendChild(errorOption);
+    });
+}
+
+function verifyCode() {
+  const code = document.getElementById('accessCode').value.trim().toUpperCase();
+  const resultDiv = document.getElementById('verificationResult');
+  const errorDiv = document.getElementById('verificationError');
+  const tierAccessText = document.getElementById('tierAccessText');
+  
+  // Check against known codes
+  const validCodes = {
+    'PREMIUMNOW': 'premium',
+    'ENTERPRISEKEY': 'enterprise',
+    'UNLOCKALL': 'enterprise'
+  };
+  
+  if (validCodes[code] && validCodes[code] === selectedTier) {
+    isVerified = true;
+    document.getElementById('verifiedCode').value = code;
+    resultDiv.classList.remove('d-none');
+    errorDiv.classList.add('d-none');
+    tierAccessText.textContent = selectedTier.toUpperCase();
+  } else {
+    isVerified = false;
+    document.getElementById('verifiedCode').value = '';
+    resultDiv.classList.add('d-none');
+    errorDiv.classList.remove('d-none');
+  }
+  
+  updateSubmitButton();
+}
+
+function updateSubmitButton() {
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = !isVerified;
+}
+
+function setPreview(data) {
+  const previewImage = document.getElementById('previewImage');
+  if (data.image) {
+    previewImage.src = data.image;
+    previewImage.style.display = 'block';
+  } else {
+    previewImage.removeAttribute('src');
+    previewImage.style.display = 'none';
+  }
+  document.getElementById('previewTitle').textContent = data.title || 'Select a dorm to preview';
+  document.getElementById('previewType').textContent = data.type || '-';
+  document.getElementById('previewPrice').textContent = data.price ? `₱${Number(data.price).toLocaleString()}` : '-';
+  document.getElementById('previewAvailability').textContent = data.availability || '-';
+}
+
+function updateDormPreview() {
+  const dropdown = document.getElementById('preferredDorm');
+  const selected = dropdown.options[dropdown.selectedIndex];
+  if (!selected || !selected.value) {
+    setPreview({
+      image: selected?.dataset?.image || (dropdown.options[1]?.dataset?.image || ''),
+      title: selected?.textContent ? selected.textContent.split(' — ')[0] : 'Select a dorm to preview',
+      type: selected?.dataset?.type || (dropdown.options[1]?.dataset?.type || '-'),
+      price: selected?.dataset?.price || (dropdown.options[1]?.dataset?.price || '-'),
+      availability: selected?.dataset?.availability || (dropdown.options[1]?.dataset?.availability || '-')
+    });
+    return;
+  }
+
+  setPreview({
+    image: selected.dataset.image,
+    title: selected.textContent.split(' — ')[0],
+    type: selected.dataset.type,
+    price: selected.dataset.price,
+    availability: selected.dataset.availability
+  });
+}
+
+// Initialize with basic tier selected
+document.addEventListener('DOMContentLoaded', function() {
+  selectTier('basic');
+  updateDormPreview();
+});
+</script>
+{% endblock %}
+

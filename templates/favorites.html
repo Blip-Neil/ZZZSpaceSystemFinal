@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Favorites{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-3">
+  <div>
+    <h1 class="display-6">Saved Favorites</h1>
+    <p class="text-muted mb-0">Your bookmarked dorms are stored locally so you can revisit them later.</p>
+  </div>
+  <div class="w-100 w-md-auto">
+    <a href="{{ url_for('listings') }}" class="btn btn-primary rounded-pill px-4">Browse more listings</a>
+  </div>
+</div>
+
+<div id="favoritesContainer" class="row gy-4"></div>
+{% endblock %}

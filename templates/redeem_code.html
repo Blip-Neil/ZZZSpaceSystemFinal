@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Redeem Code{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow-sm rounded-4">
+      <div class="card-body p-5">
+        <h1 class="h3 mb-3">Redeem or buy access</h1>
+        <p class="text-muted mb-4">Enter your private access code below. If you need a code, use Buy Code to continue. Code values are hidden here for your own security.</p>
+        <form action="{{ url_for('redeem_code') }}" method="post" class="mt-4">
+          <div class="mb-4 border rounded-4 bg-light p-3">
+            <p class="mb-0"><strong>Tip:</strong> your code is private. Do not share it in the interface.</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Access code</label>
+            <input type="text" name="code" class="form-control" placeholder="Enter your code" required />
+          </div>
+          <div class="d-flex flex-column flex-sm-row gap-2">
+            <button type="submit" class="btn btn-primary rounded-pill px-4">Apply Code</button>
+            <a href="{{ url_for('buy_code') }}" class="btn btn-outline-primary rounded-pill px-4">Buy Code</a>
+            <a href="{{ url_for('listings') }}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Edit Service Ad{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title mb-3">Edit Service</h2>
+        <p class="text-muted mb-4">Update the details for your service ad.</p>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Service Title</label>
+            <input type="text" name="title" class="form-control" value="{{ service.title }}" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" class="form-control" value="{{ service.location }}" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Price or Rate</label>
+            <input type="text" name="price" class="form-control" value="{{ service.price }}" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Service Description</label>
+            <textarea name="description" class="form-control" rows="5" required>{{ service.description }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <a href="{{ url_for('business_dashboard') }}" class="btn btn-link">Cancel</a>
+        </form>
+        <div class="mt-4 p-3 rounded-4 bg-light border">
+          <h6 class="mb-2">Suggested student services</h6>
+          <ul class="small mb-0">
+            <li>Laundry pickup and delivery</li>
+            <li>Gas refill or delivery</li>
+            <li>Laptop repair and maintenance</li>
+            <li>Phone repair and replacement</li>
+            <li>Move-in / move-out assistance</li>
+            <li>Relocation and packing support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

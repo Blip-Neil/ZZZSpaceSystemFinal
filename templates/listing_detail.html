@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ listing['title'] }}{% endblock %}
+
+{% block content %}
+<style>
+body {
+  background-color: white !important;
+  background-image: none !important;
+}
+</style>
+<div class="mb-3">
+  <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">← Back</a>
+</div>
+
+<div class="row gy-4">
+  <div class="col-lg-6">
+    <div class="card shadow-sm rounded-4 overflow-hidden">
+      <img src="{{ listing['image_url'] }}" class="img-fluid" alt="{{ listing['title'] }}" />
+    </div>
+    <div class="mt-4 p-4 bg-light rounded-4 border">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+        <div>
+          <h5 class="mb-2">LiteZ Sync — Offline Mode</h5>
+          <p class="mb-1 text-muted">This listing is stored locally for offline access. The last 20 viewed dorms are cached with photos and contact details.</p>
+          <p class="mb-0 text-muted">Star a listing to save it as an offline map pin for walking visits without signal.</p>
+        </div>
+        <button id="saveListingBtn" type="button" class="btn btn-outline-primary rounded-pill">☆ Save for offline</button>
+      </div>
+      <div class="mt-3">
+        <span class="badge bg-secondary">Cached listings: <span id="litezCachedCount">0</span> / 20</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <h1 class="mb-3">{{ listing['title'] }}</h1>
+    <p class="text-success fw-bold fs-4 mb-3">₱{{ "%.0f"|format(listing['price']) }} / month</p>
+    <p class="mb-2"><strong>Location:</strong> {{ listing['location'] }}</p>
+    <p class="mb-2"><strong>Type:</strong> {{ listing['type'] }}</p>
+    <p class="mb-2"><strong>Tier:</strong> <span class="badge bg-{{ 'success' if listing['tier'] == 'basic' else 'warning' if listing['tier'] == 'premium' else 'dark' }} text-uppercase">{{ listing['tier']|default('basic') }}</span></p>
+    <p class="mb-2"><strong>Rooms available:</strong> {{ listing['rooms_available'] }}</p>
+    <p class="mb-2"><strong>Size:</strong> {{ listing['size'] }}</p>
+    {% set status = 'Occupied' %}
+    {% set status_class = 'bg-danger' %}
+    {% if listing['rooms_available']|int > 1 %}
+      {% set status = 'Available' %}{% set status_class = 'bg-success' %}
+    {% elif listing['rooms_available']|int == 1 %}
+      {% set status = 'Shared' %}{% set status_class = 'bg-warning text-dark' %}
+    {% endif %}
+    <p class="mb-2"><strong>Status:</strong> <span class="badge {{ status_class }}">{{ status }}</span></p>
+    {% if listing['landlord_name'] %}
+    <p class="mb-2"><strong>Landlord:</strong> {{ listing['landlord_name'] }}</p>
+    {% endif %}
+
+    <div class="amenities mt-4">
+      <h5>Amenities</h5>
+      <ul class="list-unstyled">
+        <li>• Wi-Fi</li>
+        <li>• Study Area</li>
+        <li>• Water</li>
+        <li>• Electricity</li>
+      </ul>
+    </div>
+
+    <div class="mt-4 mb-4">
+      <h5>Description</h5>
+      <p class="text-muted">{{ listing['description'] }}</p>
+    </div>
+
+    {% if accessible %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Book this room</h5>
+        <p class="text-muted">Submit a booking request with payment details to reserve this room. Your request will be sent to the landlord for confirmation.</p>
+        <form action="{{ url_for('book_listing', listing_id=listing['id']) }}" method="post">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Dorm Location</label>
+              <input type="text" name="dorm_location" class="form-control" placeholder="Enter your dorm or pickup location" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Move-in Date</label>
+              <input type="date" name="move_in_date" class="form-control" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contact Email / Phone</label>
+              <input type="text" name="contact" class="form-control" placeholder="Email or phone number" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Payment Method</label>
+              <select name="payment_method" class="form-select" required>
+                <option value="">Select method</option>
+                <option value="GCash">GCash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cash on Site">Cash on Site</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Payment Reference</label>
+              <input type="text" name="payment_reference" class="form-control" placeholder="e.g. transaction ID" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Room Price</label>
+              <input type="text" class="form-control" value="₱{{ "%.0f"|format(listing['price']) }}" readonly />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Booking Notes</label>
+              <textarea name="notes" class="form-control" rows="3" placeholder="Tell the landlord any special requests"></textarea>
+            </div>
+          </div>
+          <div class="mt-4 d-flex flex-column flex-md-row align-items-center gap-3">
+            <button type="submit" class="btn btn-success rounded-pill px-4">Book Room</button>
+            <p class="text-muted mb-0">Payment is required to complete the avail request. Select your preferred method and enter a reference.</p>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div class="card shadow-sm mb-4 border-danger">
+      <div class="card-body">
+        <h5 class="card-title text-danger">Locked room tier</h5>
+        <p class="text-muted">This is a {{ listing['tier']|capitalize }} room. Basic users can view only Basic rooms. Upgrade to Premium or Enterprise to access this room.</p>
+        <div class="d-flex flex-column gap-3">
+          <a href="{{ url_for('set_plan', plan='premium') }}" class="btn btn-warning rounded-pill px-4">Buy Premium Access</a>
+          <a href="{{ url_for('set_plan', plan='enterprise') }}" class="btn btn-dark rounded-pill px-4">Buy Enterprise Access</a>
+          <div>
+            <p class="mb-2"><strong>Have a redeem code?</strong></p>
+            <form action="{{ url_for('redeem_code') }}" method="post" class="d-flex gap-2 flex-column flex-sm-row">
+              <input type="text" name="code" class="form-control" placeholder="Enter redeem code" />
+              <button type="submit" class="btn btn-primary rounded-pill">Apply Code</button>
+            </form>
+            <p class="text-muted small mt-2 mb-0">Try codes like <strong>PREMIUMNOW</strong>, <strong>ENTERPRISEKEY</strong>, or <strong>UNLOCKALL</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+const listingData = {
+  id: {{ listing['id'] }},
+  title: {{ listing['title']|tojson }},
+  location: {{ listing['location']|tojson }},
+  price: {{ listing['price']|tojson }},
+  description: {{ listing['description']|tojson }},
+  image_url: {{ listing['image_url']|tojson }},
+  landlord_name: {{ listing['landlord_name']|tojson }},
+  landlord_email: {{ listing['landlord_email']|tojson }},
+  landlord_phone: {{ listing['landlord_phone']|tojson }},
+};
+
+function getLiteZStorage(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch (err) {
+    return [];
+  }
+}
+
+function setLiteZStorage(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function updateLiteZUI() {
+  const saved = getLiteZStorage('litez_saved_listings');
+  const cached = getLiteZStorage('litez_viewed_listings');
+  const button = document.getElementById('saveListingBtn');
+  const count = document.getElementById('litezCachedCount');
+  const isSaved = saved.some(item => item.id === listingData.id);
+  button.textContent = isSaved ? '★ Saved offline' : '☆ Save for offline';
+  button.className = isSaved ? 'btn btn-primary rounded-pill' : 'btn btn-outline-primary rounded-pill';
+  count.textContent = cached.length;
+}
+
+function cacheViewedListing() {
+  const cached = getLiteZStorage('litez_viewed_listings');
+  const filtered = cached.filter(item => item.id !== listingData.id);
+  filtered.unshift(listingData);
+  if (filtered.length > 20) {
+    filtered.length = 20;
+  }
+  setLiteZStorage('litez_viewed_listings', filtered);
+  updateLiteZUI();
+}
+
+function toggleSavedListing() {
+  const saved = getLiteZStorage('litez_saved_listings');
+  const index = saved.findIndex(item => item.id === listingData.id);
+  if (index >= 0) {
+    saved.splice(index, 1);
+  } else {
+    saved.push(listingData);
+  }
+  setLiteZStorage('litez_saved_listings', saved);
+  updateLiteZUI();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const button = document.getElementById('saveListingBtn');
+  button.addEventListener('click', toggleSavedListing);
+  cacheViewedListing();
+});
+</script>
+{% endblock %}

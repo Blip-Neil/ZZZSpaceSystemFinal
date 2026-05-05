@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Buy Access Code{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-xl-8">
+    <div class="card shadow-sm rounded-4 overflow-hidden">
+      <div class="row g-0">
+        <div class="col-md-5 bg-dorming-dark text-white p-5 d-flex flex-column justify-content-center">
+          <div>
+            <h2 class="fw-bold mb-3">Plan Access</h2>
+            <p class="text-white-75 mb-4">Choose the plan access code that matches the rooms you want to unlock. Code values are not shown here for security.</p>
+            <p class="mb-0"><strong>Premium</strong> unlocks premium rooms with extra comfort and style.</p>
+            <p class="mb-0"><strong>Enterprise</strong> unlocks all premium and enterprise rooms.</p>
+          </div>
+        </div>
+        <div class="col-md-7 p-5">
+          <h3 class="mb-4">Get access by plan</h3>
+          <div class="row g-3 mb-4">
+            <div class="col-12">
+              <div class="card border rounded-4 p-4 h-100">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                  <div>
+                    <h5 class="mb-2">Premium Access</h5>
+                    <p class="text-muted mb-2">Unlock premium rooms and dorms that are reserved for upgraded users.</p>
+                  </div>
+                  <span class="badge bg-warning text-dark">Premium</span>
+                </div>
+                <ul class="mb-3 text-muted small">
+                  <li>Business-style dorms</li>
+                  <li>Better locations</li>
+                  <li>Higher priority rooms</li>
+                </ul>
+                <a href="{{ url_for('redeem_code') }}" class="btn btn-outline-primary rounded-pill">Buy Premium Access</a>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="card border rounded-4 p-4 h-100">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                  <div>
+                    <h5 class="mb-2">Enterprise Access</h5>
+                    <p class="text-muted mb-2">Unlock every room including enterprise and VIP-level listings.</p>
+                  </div>
+                  <span class="badge bg-dark text-white">Enterprise</span>
+                </div>
+                <ul class="mb-3 text-muted small">
+                  <li>Full room access</li>
+                  <li>Premium plus VIP rooms</li>
+                  <li>Best all-access experience</li>
+                </ul>
+                <a href="{{ url_for('redeem_code') }}" class="btn btn-outline-dark rounded-pill">Buy Enterprise Access</a>
+              </div>
+            </div>
+          </div>
+          <div class="border rounded-4 p-4 bg-light mb-4">
+            <h6 class="mb-2">Need a code?</h6>
+            <p class="text-muted mb-0">If you already have a private access code, use the redeem page to apply it immediately.</p>
+          </div>
+          <div class="d-flex flex-column flex-sm-row gap-2">
+            <a href="{{ url_for('redeem_code') }}" class="btn btn-primary rounded-pill px-4">Use Redeem Code</a>
+            <a href="{{ url_for('listings') }}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
